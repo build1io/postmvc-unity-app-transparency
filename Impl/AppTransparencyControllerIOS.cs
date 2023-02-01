@@ -10,7 +10,7 @@ using UnityEngine.iOS;
 
 namespace Build1.PostMVC.Unity.AppTransparency.Impl
 {
-    public sealed class AppTransparencyControllerIOS : IAppTransparencyController
+    internal sealed class AppTransparencyControllerIOS : IAppTransparencyController
     {
         [Log(LogLevel.Warning)] public ILog             Log           { get; set; }
         [Inject]                public IAsyncResolver   AsyncResolver { get; set; }

@@ -3,7 +3,7 @@ using Build1.PostMVC.Core.MVCS.Injection;
 
 namespace Build1.PostMVC.Unity.AppTransparency.Impl
 {
-    public sealed class AppTransparencyControllerDefault : IAppTransparencyController
+    internal sealed class AppTransparencyControllerDefault : IAppTransparencyController
     {
         [Inject] public IEventDispatcher Dispatcher { get; set; }
 
