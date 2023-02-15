@@ -19,14 +19,17 @@ namespace Build1.PostMVC.Unity.AppTransparency.Editor
         
         private static void AddPListValues(string buildPath)
         {
-            var description = $"Allow \"{Application.productName}\" to track your activity across other companies' apps and websites?";
-            
             var path = buildPath + "/Info.plist";
             var obj = new PlistDocument();
             obj.ReadFromString(File.ReadAllText(path));
-            obj.root.SetString("NSUserTrackingUsageDescription", description);
+            obj.root.SetString("NSUserTrackingUsageDescription", GetAppTransparencyMessage());
 
             File.WriteAllText(path, obj.WriteToString());
+        }
+
+        internal static string GetAppTransparencyMessage()
+        {
+            return $"Allow \"{Application.productName}\" to track your activity across other companies' apps and websites?";
         }
     }
 }

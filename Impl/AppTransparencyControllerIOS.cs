@@ -1,59 +1,41 @@
-#if UNITY_IOS
+#if UNITY_IOS || UNITY_EDITOR
 
 using System;
-using Build1.PostMVC.Core.MVCS.Events;
 using Build1.PostMVC.Core.MVCS.Injection;
+using Build1.PostMVC.Unity.App.Modules.App;
 using Unity.Advertisement.IosSupport;
 using Build1.PostMVC.Unity.App.Modules.Async;
-using Build1.PostMVC.Unity.App.Modules.Logging;
 using UnityEngine.iOS;
 
 namespace Build1.PostMVC.Unity.AppTransparency.Impl
 {
-    internal sealed class AppTransparencyControllerIOS : IAppTransparencyController
+    internal sealed class AppTransparencyControllerIOS : AppTransparencyControllerBase, IAppTransparencyController
     {
-        [Log(LogLevel.Warning)] public ILog             Log           { get; set; }
-        [Inject]                public IAsyncResolver   AsyncResolver { get; set; }
-        [Inject]                public IEventDispatcher Dispatcher    { get; set; }
-
-        public AppTransparencyStatus Status      { get; private set; } = AppTransparencyStatus.NotDetermined;
-        public bool                  Initialized { get; private set; }
-        
-        public bool TrackingAllowed => Status == AppTransparencyStatus.Authorized ||
-                                       Status == AppTransparencyStatus.Restricted;
+        [Inject] public IAsyncResolver AsyncResolver { get; set; }
 
         private int _intervalId;
 
-        /*
-         * Public.
-         */
-
-        public void Check()
+        [PostConstruct]
+        public void PostConstruct()
         {
-            Log.Debug("Check");
+            Dispatcher.AddListener(AppEvent.Pause, OnAppPause);
+            
+            _intervalId = AsyncResolver.DefaultCallId;
+        }
 
-            if (!CheckAuthorizationSupported())
-            {
-                Complete(AppTransparencyStatus.NotDetermined);
-                return;
-            }
+        [PreDestroy]
+        public void PreDestroy()
+        {
+            Dispatcher.RemoveListener(AppEvent.Pause, OnAppPause);
 
-            var statusRaw = ATTrackingStatusBinding.GetAuthorizationTrackingStatus();
-            if (statusRaw == ATTrackingStatusBinding.AuthorizationTrackingStatus.NOT_DETERMINED)
-            {
-                ATTrackingStatusBinding.RequestAuthorizationTracking();
-                _intervalId = AsyncResolver.IntervalCall(CheckAuthorizationStatus, 1F);
-                return;
-            }
-
-            Complete(RawStatusToStatus(statusRaw));
+            AsyncResolver.CancelCall(ref _intervalId);
         }
 
         /*
-         * Private.
+         * Authorization.
          */
 
-        private bool CheckAuthorizationSupported()
+        protected override bool GetAuthorizationSupported()
         {
             bool supported;
 
@@ -78,10 +60,21 @@ namespace Build1.PostMVC.Unity.AppTransparency.Impl
 
             return supported;
         }
-
-        private void CheckAuthorizationStatus()
+        
+        protected override AppTransparencyStatus GetAuthorizationStatus()
         {
-            Log.Debug("CheckAuthorizationStatus");
+            return RawStatusToStatus(ATTrackingStatusBinding.GetAuthorizationTrackingStatus());
+        }
+
+        protected override void OnAuthorizationRequest()
+        {
+            ATTrackingStatusBinding.RequestAuthorizationTracking();
+            _intervalId = AsyncResolver.IntervalCall(CheckAuthorizationRequestStatus, 1F);
+        }
+        
+        private void CheckAuthorizationRequestStatus()
+        {
+            Log.Debug("Authorization iteration");
 
             var statusRaw = ATTrackingStatusBinding.GetAuthorizationTrackingStatus();
             if (statusRaw == ATTrackingStatusBinding.AuthorizationTrackingStatus.NOT_DETERMINED)
@@ -89,12 +82,12 @@ namespace Build1.PostMVC.Unity.AppTransparency.Impl
 
             AsyncResolver.CancelCall(ref _intervalId);
 
-            var status = RawStatusToStatus(statusRaw);
-
-            Complete(status);
-            
-            Dispatcher.Dispatch(AppTransparencyEvent.Changed, status);
+            OnCompleteAuthorization(RawStatusToStatus(statusRaw));
         }
+
+        /*
+         * Private.
+         */
 
         private AppTransparencyStatus RawStatusToStatus(ATTrackingStatusBinding.AuthorizationTrackingStatus statusRaw)
         {
@@ -107,15 +100,15 @@ namespace Build1.PostMVC.Unity.AppTransparency.Impl
                 _                                                                  => throw new ArgumentOutOfRangeException()
             };
         }
+        
+        /*
+         * Event Handlers.
+         */
 
-        private void Complete(AppTransparencyStatus status)
+        private void OnAppPause(bool paused)
         {
-            Log.Debug("Complete");
-
-            Status = status;
-            Initialized = true;
-            
-            Dispatcher.Dispatch(AppTransparencyEvent.Ready, status);
+            if (Initialized && !Autorizing && !paused)
+                TryUpdateAuthorizationStatus(GetAuthorizationStatus());
         }
     }
 }

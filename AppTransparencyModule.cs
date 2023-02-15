@@ -10,10 +10,12 @@ namespace Build1.PostMVC.Unity.AppTransparency
         [PostConstruct]
         public void PostConstruct()
         {
-            #if UNITY_IOS && !UNITY_EDITOR
+            #if UNITY_EDITOR
+                InjectionBinder.Bind<IAppTransparencyController, Impl.AppTransparencyControllerEditor>();
+            #elif UNITY_IOS
                 InjectionBinder.Bind<IAppTransparencyController, Impl.AppTransparencyControllerIOS>();
-            #else
-                InjectionBinder.Bind<IAppTransparencyController, Impl.AppTransparencyControllerDefault>();
+            #elif UNITY_ANDROID
+                InjectionBinder.Bind<IAppTransparencyController, Impl.AppTransparencyControllerAndroid>();
             #endif
         }
     }
