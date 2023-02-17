@@ -1,4 +1,4 @@
-#if UNITY_EDITOR && UNITY_IOS
+#if UNITY_EDITOR
 
 using System.IO;
 using UnityEditor;
