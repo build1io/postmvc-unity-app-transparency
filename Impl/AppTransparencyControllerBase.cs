@@ -6,8 +6,8 @@ namespace Build1.PostMVC.Unity.AppTransparency.Impl
 {
     public abstract class AppTransparencyControllerBase
     {
-        [Log(LogLevel.All)] public ILog             Log        { get; set; }
-        [Inject]            public IEventDispatcher Dispatcher { get; set; }
+        [Log(LogLevel.Warning)] public ILog             Log        { get; set; }
+        [Inject]                public IEventDispatcher Dispatcher { get; set; }
 
         public AppTransparencyStatus Status       { get; private set; } = AppTransparencyStatus.Unknown;
         public bool                  Initializing { get; private set; }
@@ -72,14 +72,14 @@ namespace Build1.PostMVC.Unity.AppTransparency.Impl
         {
             if (!Initializing)
                 return;
-            
+
             Log.Debug(s => $"Initialized. Status: {s}", Status);
 
             Initializing = false;
             Initialized = true;
             Dispatcher.Dispatch(AppTransparencyEvent.Initialized);
         }
-        
+
         /*
          * Authorization.
          */
@@ -94,7 +94,7 @@ namespace Build1.PostMVC.Unity.AppTransparency.Impl
                 Log.Error("Authorization request rejected. User already allowed or denied data tracking.");
                 return;
             }
-            
+
             if (Autorizing)
             {
                 Log.Error("Authorization already in progress");
@@ -113,12 +113,12 @@ namespace Build1.PostMVC.Unity.AppTransparency.Impl
         {
             if (!Autorizing)
                 return;
-            
+
             Log.Debug(s => $"Authorization complete. Status: {s}", status);
-            
+
             TryUpdateAuthorizationStatus(status);
 
-            Autorizing = false;            
+            Autorizing = false;
 
             if (Initializing)
                 InitializeComplete();
