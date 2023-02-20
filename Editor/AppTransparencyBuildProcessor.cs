@@ -29,7 +29,7 @@ namespace Build1.PostMVC.Unity.AppTransparency.Editor
 
         internal static string GetAppTransparencyMessage()
         {
-            return $"Allow \"{Application.productName}\" to track your activity across other companies' apps and websites?";
+            return "Your data will be used to provide you and other users a better and personalized experience.";
         }
     }
 }
