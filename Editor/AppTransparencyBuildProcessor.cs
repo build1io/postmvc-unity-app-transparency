@@ -4,7 +4,6 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.iOS.Xcode;
-using UnityEngine;
 
 namespace Build1.PostMVC.Unity.AppTransparency.Editor
 {
@@ -29,7 +28,7 @@ namespace Build1.PostMVC.Unity.AppTransparency.Editor
 
         internal static string GetAppTransparencyMessage()
         {
-            return "Your data will be used to provide you and other users a better and personalized experience.";
+            return "Help optimize our app to provide you and other users with a better personalized experience.";
         }
     }
 }
