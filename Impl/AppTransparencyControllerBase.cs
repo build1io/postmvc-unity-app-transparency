@@ -14,9 +14,6 @@ namespace Build1.PostMVC.Unity.AppTransparency.Impl
         public bool                  Initialized  { get; private set; }
         public bool                  Autorizing   { get; private set; }
 
-        public bool TrackingAllowed => Status == AppTransparencyStatus.Authorized ||
-                                       Status == AppTransparencyStatus.Restricted;
-
         private AppTransparencySettings _settings;
 
         /*

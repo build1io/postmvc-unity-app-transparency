@@ -7,33 +7,46 @@ namespace Build1.PostMVC.Unity.AppTransparency.Editor
 {
     public static class AppTransparencyMenu
     {
-        private const string EnabledMenuItem  = "Tools/Build1/PostMVC/App Transparency/Enable";
-        private const string DisabledMenuItem = "Tools/Build1/PostMVC/App Transparency/Disable";
+        private const string AllowMenuItem    = "Tools/Build1/PostMVC/App Transparency/Allow";
+        private const string RestrictMenuItem = "Tools/Build1/PostMVC/App Transparency/Restrict";
+        private const string DenyMenuItem     = "Tools/Build1/PostMVC/App Transparency/Deny";
         private const string ResetMenuItem    = "Tools/Build1/PostMVC/App Transparency/Reset";
 
-        [MenuItem(EnabledMenuItem, false, 0)]
-        public static void Enable()
+        [MenuItem(AllowMenuItem, false, 0)]
+        public static void Allow()
         {
-            
             AppTransparencyControllerEditor.SetAuthorizationStatusStatic(AppTransparencyStatus.Authorized);
             EditorUtility.DisplayDialog("App Transparency", $"Editor authorization status set: {AppTransparencyControllerEditor.GetAuthorizationStatusStatic()}", "Ok");
         }
 
-        [MenuItem(EnabledMenuItem, true, 0)]
-        public static bool EnableValidation()
+        [MenuItem(AllowMenuItem, true, 0)]
+        public static bool AllowValidation()
         {
             return AppTransparencyControllerEditor.GetAuthorizationStatusStatic() != AppTransparencyStatus.Authorized;
         }
 
-        [MenuItem(DisabledMenuItem, false, 1)]
-        public static void Disable()
+        [MenuItem(RestrictMenuItem, false, 1)]
+        public static void Restrict()
+        {
+            AppTransparencyControllerEditor.SetAuthorizationStatusStatic(AppTransparencyStatus.Restricted);
+            EditorUtility.DisplayDialog("App Transparency", $"Editor authorization status set: {AppTransparencyControllerEditor.GetAuthorizationStatusStatic()}", "Ok");
+        }
+
+        [MenuItem(RestrictMenuItem, true, 1)]
+        public static bool RestrictValidation()
+        {
+            return AppTransparencyControllerEditor.GetAuthorizationStatusStatic() != AppTransparencyStatus.Restricted;
+        }
+        
+        [MenuItem(DenyMenuItem, false, 1)]
+        public static void Deny()
         {
             AppTransparencyControllerEditor.SetAuthorizationStatusStatic(AppTransparencyStatus.Denied);
             EditorUtility.DisplayDialog("App Transparency", $"Editor authorization status set: {AppTransparencyControllerEditor.GetAuthorizationStatusStatic()}", "Ok");
         }
 
-        [MenuItem(DisabledMenuItem, true, 1)]
-        public static bool DisableValidation()
+        [MenuItem(DenyMenuItem, true, 1)]
+        public static bool DenyValidation()
         {
             return AppTransparencyControllerEditor.GetAuthorizationStatusStatic() != AppTransparencyStatus.Denied;
         }

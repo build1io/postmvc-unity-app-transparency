@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 
+using System;
 using Build1.PostMVC.Core.MVCS.Injection;
 using Build1.PostMVC.Unity.App.Modules.App;
 using Build1.PostMVC.Unity.AppTransparency.Editor;
@@ -42,9 +43,19 @@ namespace Build1.PostMVC.Unity.AppTransparency.Impl
         {
             Log.Debug("Editor simulation. Showing authorization request...");
 
-            var status = EditorUtility.DisplayDialog("App Transparency", AppTransparencyBuildProcessor.GetAppTransparencyMessage(), "Ask app not to track", "Allow")
-                             ? AppTransparencyStatus.Restricted
-                             : AppTransparencyStatus.Authorized;
+            var option = EditorUtility.DisplayDialogComplex("App Transparency",
+                                                            AppTransparencyBuildProcessor.GetAppTransparencyMessage(),
+                                                            "Allow",
+                                                            "Ask app not to track",
+                                                            "Deny");
+
+            var status = option switch
+            {
+                0 => AppTransparencyStatus.Authorized,
+                1 => AppTransparencyStatus.Restricted,
+                2 => AppTransparencyStatus.Denied,
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
             SetAuthorizationStatusStatic(status);
             OnCompleteAuthorization(status);
