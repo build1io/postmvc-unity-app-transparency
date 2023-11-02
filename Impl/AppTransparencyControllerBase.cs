@@ -100,6 +100,8 @@ namespace Build1.PostMVC.Unity.AppTransparency.Impl
 
             Log.Debug("Requesting authorization...");
 
+            Dispatcher.Dispatch(AppTransparencyEvent.AuthorizationRequesting);
+            
             Autorizing = true;
             OnAuthorizationRequest();
         }
